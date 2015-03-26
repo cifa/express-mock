@@ -1,0 +1,18 @@
+{
+  "paths": [
+      "/templates",
+      "/templates/{{id}}"
+  ],
+
+  "fixtures": {
+    "templates": [
+      {
+        "id": "1",
+        "name": "ORDER CONFIRMATION"
+      },
+      {
+        "id": "2",
+        "name": "ORDER CANCELLATION"
+      }]
+    }
+}
