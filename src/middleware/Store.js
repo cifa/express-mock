@@ -1,70 +1,42 @@
 (function() {
-  var fs = require('fs'),
-    util =  require('util'),
-    config = {},
-    processor = {
-      paramRegex: /{{(.*?)}}/g,
-      get: function(url, req, res, next) {
-        var segments = url.split('/');
-        var result;
-        var fixtures = config.fixtures[segments[1]];
-        if (segments[2]) {
-          var field = paramRegex.exec(segments[2])[0];
-          var value = paramRegex.exec(req.url)[0];
-          fixtures.forEach(function(fixture) {
-            if (fixture[field] === value) {
-              result = fixture;
-            }
-          })
-        } else {
-          result = fixtures;
-        }
-        res.status(200).send(JSON.stringify(fixtures));
+  var configuredFixtures = {},
+      currentFixtures = {};
+
+  exports.setFixtures = function(fixtures) {
+    configuredFixtures = fixtures;
+  };
+
+  exports.resetFixtures = function() {
+    currentFixtures = JSON.parse(JSON.stringify(configuredFixtures));
+  }
+
+  exports.get = function(query, req, res) {
+    var temp, result, paramIndex, segments, i;
+    result = currentFixtures;
+    paramIndex = 0;
+    segments = query.path.split('/').slice(1);
+
+    for (i = 0; i < segments.length; i++) {
+      if (segments[i].indexOf('{{') === -1) {
+        result = result[segments[i]];
+      } else {
+        temp = undefined;
+        result.forEach(function(f) {
+          if (f[query.paramNames[paramIndex]] === query.paramValues[paramIndex]) {
+            temp = f;
+          }
+        })
+        result = temp;
+        paramIndex++
+      }
+      if (result === undefined) {
+        res.status(404).send(JSON.stringify({
+          'httpStatus': 404,
+          'code': 'NOT_FOUND_IN_STORE',
+          'message': req.header('host') + req.url + ' not found in store'
+        }));
       }
     }
-
-  exports.loadConfig = function(filepath) {
-    if (filepath) {
-      var path = require('path');
-      var root = path.resolve(__dirname, '../..');
-      config = JSON.parse(fs.readFileSync(path.join(root, filepath), 'utf8'));
-    }
-  };
-
-  exports.reset = function(req, res, next) {
-    res.set('Content-Type', 'application/json');
-    if (req.url === '/reset') {
-      res.status(200);
-  		res.end();
-    } else {
-      next();
-    }
-  };
-
-  exports.schedule = function(req, res, next) {
-    next();
-  };
-
-  exports.process = function(req, res, next) {
-    var matches = findMatches(req.url);
-    if (matches.length > 0) {
-      var method = req.method.toLowerCase();
-      processor[method](matches[0], req, res, next);
-    } else {
-      next();
-    }
-  };
-
-  function findMatches(url) {
-    var matches = [];
-
-    if (config.paths && util.isArray(config.paths)) {
-      config.paths.forEach(function(path) {
-        if (url === path) {
-          matches.push(path);
-        }
-      });
-    }
-    return matches;
-  };
+    res.status(200).send(JSON.stringify(result));
+  }
 })();

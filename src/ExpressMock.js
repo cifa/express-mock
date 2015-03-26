@@ -5,17 +5,17 @@ var express = require('express')
 
 var ExpressMock = (function () {
   function ExpressMock(config) {
-    this.store = require('./middleware/Store')
+    this.service = require('./middleware/Service')
     if (config == undefined) {
       config = {};
     }
     this.port = config.port || 3000;
-    this.store.loadConfig(config.configFilePath);
+    this.service.loadConfig(config.configFilePath);
     this.app = express();
 
-    this.app.use(this.store.reset);
-    this.app.use(this.store.schedule);
-    this.app.use(this.store.process);
+    this.app.use(this.service.reset);
+    this.app.use(this.service.schedule);
+    this.app.use(this.service.process);
     this.app.use(responses.default);
   };
 

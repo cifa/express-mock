@@ -19,14 +19,10 @@ describe('ExpressMock', function(){
 
   describe('With BasicConfig', function(){
 
-    function assertDefaultResponse(res) {
-      assert.equal(res.statusCode, 404);
-      assert.equal(res.body.code, 'NO_SUCH_ENDPOINT');
-    }
-
     it('calling GET on unknown endpoint => 404', function(done){
       http.get('/unknown', function(res) {
-        assertDefaultResponse(res);
+        assert.equal(res.statusCode, 404);
+        assert.equal(res.body.code, 'NO_SUCH_ENDPOINT');
         done();
       });
     });
@@ -46,6 +42,14 @@ describe('ExpressMock', function(){
         assert.equal(res.statusCode, 200);
         assert.equal(res.body.id, '2');
         assert.equal(res.body.name, 'ORDER CANCELLATION');
+        done();
+      });
+    });
+
+    it('calling GET on /templates/3 => 404', function(done){
+      http.get('/templates/3', function(res) {
+        assert.equal(res.statusCode, 404);
+        assert.equal(res.body.code, 'NOT_FOUND_IN_STORE');
         done();
       });
     });
