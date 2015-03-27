@@ -12,6 +12,12 @@ describe('ExpressMock', function(){
     server.start(done);
   });
 
+  beforeEach(function(done) {
+    http.get('/reset', function() {
+      done();
+    });
+  });
+
   after(function(done) {
     http.terminate();
     server.stop(done);
@@ -19,7 +25,7 @@ describe('ExpressMock', function(){
 
   describe('With BasicConfig', function(){
 
-    it('calling GET on unknown endpoint => 404', function(done){
+    it('calling GET on unknown endpoint => 404 - NO_SUCH_ENDPOINT', function(done){
       http.get('/unknown', function(res) {
         assert.equal(res.statusCode, 404);
         assert.equal(res.body.code, 'NO_SUCH_ENDPOINT');
@@ -46,7 +52,7 @@ describe('ExpressMock', function(){
       });
     });
 
-    it('calling GET on /templates/3 => 404', function(done){
+    it('calling GET on /templates/3 => 404 - NOT_FOUND_IN_STORE', function(done){
       http.get('/templates/3', function(res) {
         assert.equal(res.statusCode, 404);
         assert.equal(res.body.code, 'NOT_FOUND_IN_STORE');
@@ -54,5 +60,54 @@ describe('ExpressMock', function(){
       });
     });
 
+    it('calling DELETE on unknown endpoint => 404 - NO_SUCH_ENDPOINT', function(done){
+      http.delete('/unknown', function(res) {
+        assert.equal(res.statusCode, 404);
+        assert.equal(res.body.code, 'NO_SUCH_ENDPOINT');
+        done();
+      });
+    });
+
+    it('calling DELETE on /templates => 204 (all records removed)', function(done){
+      http.delete('/templates', function(res) {
+        assert.equal(res.statusCode, 204);
+        http.get('/templates', function(res) {
+          assert.equal(res.statusCode, 200);
+          assert.equal(res.body.length, 0);
+          done();
+        });
+      });
+    });
+
+    it('calling DELETE on /templates/2 => 204 (single record removed)', function(done){
+      http.delete('/templates/2', function(res) {
+        assert.equal(res.statusCode, 204);
+        http.get('/templates', function(res) {
+          assert.equal(res.statusCode, 200);
+          assert.equal(res.body.length, 1);
+          assert.equal(res.body[0].id, '1');
+          done();
+        });
+      });
+    });
+
+    it('calling DELETE on /templates/3 => 404 - NOT_FOUND_IN_STORE', function(done){
+      http.delete('/templates/3', function(res) {
+        assert.equal(res.statusCode, 404);
+        assert.equal(res.body.code, 'NOT_FOUND_IN_STORE');
+        done();
+      });
+    });
+
+    it('calling PUT on unknown endpoint => 404 - NO_SUCH_ENDPOINT', function(done){
+      http.put({
+        id: 1,
+        name: 'NEW ADDRESS'
+      },'/unknown', function(res) {
+        assert.equal(res.statusCode, 404);
+        assert.equal(res.body.code, 'NO_SUCH_ENDPOINT');
+        done();
+      });
+    });
   });
 });
