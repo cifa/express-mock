@@ -1,6 +1,7 @@
 var express = require('express')
   , http = require('http')
   , util = require('util')
+  , bodyParser = require('body-parser')
   , responses = require('./middleware/Responses');
 
 var ExpressMock = (function () {
@@ -13,6 +14,7 @@ var ExpressMock = (function () {
     this.service.loadConfig(config.configFilePath);
     this.app = express();
 
+    this.app.use(bodyParser.json());
     this.app.use(this.service.reset);
     this.app.use(this.service.schedule);
     this.app.use(this.service.process);
