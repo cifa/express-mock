@@ -1,8 +1,7 @@
 var express = require('express')
   , http = require('http')
   , util = require('util')
-  , bodyParser = require('body-parser')
-  , responses = require('./middleware/Responses');
+  , bodyParser = require('body-parser');
 
 var ExpressMock = (function () {
   function ExpressMock(config) {
@@ -18,7 +17,6 @@ var ExpressMock = (function () {
     this.app.use(this.service.reset);
     this.app.use(this.service.schedule);
     this.app.use(this.service.process);
-    this.app.use(responses.default);
   };
 
   function invokeCallback(callback) {

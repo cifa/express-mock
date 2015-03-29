@@ -11,23 +11,16 @@
     currentFixtures = JSON.parse(JSON.stringify(configuredFixtures));
   };
 
-  exports.get = function(query, req, res) {
-    var result, segments;
-    segments = getSegments(query.path);
-    result = find(currentFixtures, segments, query.paramNames, query.paramValues);
-    if (result) {
-      res.status(200).send(JSON.stringify(result));
-    } else {
-      reply404(req, res);
-    }
+  exports.get = function(query, done) {
+    var segments = getSegments(query.path);
+    query.body = find(currentFixtures, segments, query.paramNames, query.paramValues);
+    query.body ? query.status = 200 : query.status = 404;
+    done(query);
   };
 
-  exports.delete = function(query, req, res) {
-    if (del(query)) {
-      reply204(res);
-    } else {
-      reply404(req, res);
-    }
+  exports.delete = function(query, done) {
+    del(query) ? query.status = 204 : query.status = 404;
+    done(query);
   };
 
   function del (query) {
@@ -52,36 +45,38 @@
     return deleted;
   };
 
-  exports.put = function(query, req, res) {
-    var result, segments;
+  exports.put = function(query, done) {
+    var result, segments, lastParamName, lastParamValue, parent, i;
     segments = getSegments(query.path);
+    query.status = 400;
 
-    if (util.isArray(req.body)) {
-      if (replaceCollection(query, req.body)) {
-        reply200(res, req.body);
+    if (util.isArray(query.body)) {
+      if (replaceCollection(query, query.body)) {
+        query.status = 200;
       } else {
-        reply400(res, 'Single object expected but found collection');
+        query.msg = 'Single object expected but found collection';
       }
-    } else if(req.body && segments[segments.length - 1].indexOf('{{') === 0) {
+    } else if(query.body) {
       lastParamName = query.paramNames[query.paramNames.length - 1];
       lastParamValue = query.paramValues[query.paramValues.length - 1]
-      req.body[lastParamName] = lastParamValue;
+      query.body[lastParamName] = lastParamValue;
       parent = findParent(segments, query.paramNames, query.paramValues);
       if (util.isArray(parent)) {
         i = findIndexOf(parent, lastParamName, lastParamValue);
         if (i === -1) {
-          parent.push(req.body);
-          replay201(req, res);
+          parent.push(query.body);
+          query.status = 201;
         } else {
-          parent.splice(i, 1, req.body);
-          reply200(res, req.body);
+          parent.splice(i, 1, query.body);
+          query.status = 200;
         }
       } else {
-        reply400(res, 'Collection expected but found a single object');
+        query.msg = 'Collection expected but found a single object';
       }
     } else {
-      reply404(req, res);
+      query.msg = 'No payload sent';
     }
+    done(query);
   };
 
   function replaceCollection(query, replacement) {
@@ -96,8 +91,9 @@
     return done;
   }
 
-  exports.post = function(query, req, res) {
-    reply404(req, res);
+  exports.post = function(query, done) {
+    query.status = 500;
+    done(query);
   };
 
   function findParent(segments, params, values) {
@@ -146,31 +142,4 @@
     return url.split('/').slice(1);
   };
 
-  function reply200(res, body) {
-    res.status(200).send(JSON.stringify(body));
-  };
-
-  function reply201(req, res, body, id) {
-
-  }
-
-  function reply204(res) {
-    res.status(204).send();
-  };
-
-  function reply400(res, msg) {
-    res.status(400).send(JSON.stringify({
-      'httpStatus': 400,
-      'code': 'BAD_REQUEST',
-      'message': msg
-    }));
-  }
-
-  function reply404(req, res) {
-    res.status(404).send(JSON.stringify({
-      'httpStatus': 404,
-      'code': 'NOT_FOUND_IN_STORE',
-      'message': req.header('host') + req.url + ' not found in store'
-    }));
-  };
 })();

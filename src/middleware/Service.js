@@ -1,7 +1,8 @@
 (function() {
   var fs = require('fs'),
     util =  require('util'),
-    store = require('./Store')
+    store = require('./Store'),
+    responses = require('./Responses'),
     paths = [];
 
   exports.loadConfig = function(filepath) {
@@ -34,14 +35,17 @@
     next();
   };
 
-  exports.process = function(req, res, next) {
-    var matches, method, result;
-    matches = findMatches(req.url);
-    if (matches.length > 0) {
+  exports.process = function(req, res) {
+    var matches, method;
+    if (req.method !== 'OPTIONS'
+        && (matches = findMatches(req.url)).length > 0) {
       method = req.method.toLowerCase();
-      store[method](matches[0], req, res, next);
+      matches[0].body = req.body;
+      store[method](matches[0], function(result) {
+        responses.reply(result, req, res);
+      });
     } else {
-      next();
+      responses.default(req, res);
     }
   };
 
@@ -57,7 +61,7 @@
       regex: new RegExp('^' + path.replace(regex, '([^/]*)') + '$', 'i'),
       params: params
     });
-  }
+  };
 
   function findMatches(url) {
     var matches = [];
@@ -70,7 +74,7 @@
           paramValues: match.slice(1, p.params.length + 1)
         })
       }
-    })
+    });
     return matches;
   };
 })();

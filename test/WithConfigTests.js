@@ -40,6 +40,17 @@ describe('ExpressMock', function(){
 
   describe('With BasicConfig', function(){
 
+    it('calling OPTIONS on existing endpoint should allow CORS', function(done){
+      http.options('/templates/2', function(res) {
+        assert.equal(res.statusCode, 200);
+        assert.equal(res.headers['access-control-allow-origin'], '*');
+        assert.equal(res.headers['access-control-allow-credentials'], 'true');
+        assert.equal(res.headers['access-control-allow-headers'], 'origin, content-type, accept, authorization, Access-Control-Allow-Origin');
+        assert.equal(res.headers['access-control-allow-methods'], 'GET, POST, PUT, DELETE, OPTIONS, HEAD');
+        done();
+      });
+    });
+
     it('calling GET on unknown endpoint => 404 - NO_SUCH_ENDPOINT', function(done){
       http.get('/unknown', function(res) {
         assert.equal(res.statusCode, 404);
@@ -139,12 +150,32 @@ describe('ExpressMock', function(){
       });
     });
 
+    it('calling PUT on /templates with empty collection => 200', function(done) {
+      http.put([], '/templates', function(res) {
+        assert.equal(res.statusCode, 200);
+        http.get('/templates', function(res) {
+          assert.equal(res.statusCode, 200);
+          assert.equal(res.body.length, 0);
+          done();
+        });
+      });
+    });
+
+    it('calling PUT on /templates with a single object => 400 (collection expected)', function(done) {
+      http.put({id: 13}, '/templates', function(res) {
+        assert.equal(res.statusCode, 400);
+        assert.equal(res.body.code, 'BAD_REQUEST');
+        assert.equal(res.body.message, 'Collection expected but found a single object');
+        done();
+      });
+    });
+
     it('calling PUT on /templates/1 with a collection => 400 (single object expected)', function(done) {
       http.put(templates, '/templates/1', function(res) {
         assert.equal(res.statusCode, 400);
         assert.equal(res.body.code, 'BAD_REQUEST');
         assert.equal(res.body.message, 'Single object expected but found collection');
-        done()
+        done();
       });
     });
 
@@ -162,5 +193,41 @@ describe('ExpressMock', function(){
         });
       });
     });
+
+    it('calling PUT on /templates/5 => 201 - resource created', function(done) {
+      http.put({
+        name: 'NEW CHECKOUT'
+      }, '/templates/5', function(res) {
+        assert.equal(res.statusCode, 201);
+        assert.equal(res.headers['location'], 'http://localhost:4000/templates/5');
+        http.get('/templates/5', function(res) {
+          assert.equal(res.statusCode, 200);
+          assert.equal(res.body.id, '5');
+          assert.equal(res.body.name, 'NEW CHECKOUT');
+          done();
+        });
+      });
+    });
+
+    it('PUT - url id takes preference over object field', function(done) {
+      http.put({
+        id: '7',
+        name: 'NEW CHECKOUT'
+      }, '/templates/8', function(res) {
+        assert.equal(res.statusCode, 201);
+        assert.equal(res.headers['location'], 'http://localhost:4000/templates/8');
+        http.get('/templates/8', function(res) {
+          assert.equal(res.statusCode, 200);
+          assert.equal(res.body.id, '8');
+          assert.equal(res.body.name, 'NEW CHECKOUT');
+          http.get('/templates/7', function(res) {
+            assert.equal(res.statusCode, 404);
+            assert.equal(res.body.code, 'NOT_FOUND_IN_STORE');
+            done();
+          });
+        });
+      });
+    });
+
   });
 });
