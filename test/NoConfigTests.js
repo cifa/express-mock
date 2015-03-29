@@ -64,7 +64,7 @@ describe('ExpressMock', function(){
     });
 
     it('calling /reset => 200', function(done){
-      http.get('/reset', function(res) {
+      http.get('/__reset__', function(res) {
         assert.equal(res.statusCode, 200);
         done();
       });

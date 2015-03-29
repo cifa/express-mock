@@ -28,7 +28,7 @@ describe('ExpressMock', function(){
   });
 
   beforeEach(function(done) {
-    http.get('/reset', function() {
+    http.get('/__reset__', function() {
       done();
     });
   });
@@ -226,6 +226,59 @@ describe('ExpressMock', function(){
             done();
           });
         });
+      });
+    });
+
+    it('calling POST on unknown endpoint => 404 - NO_SUCH_ENDPOINT', function(done){
+      http.post({
+        name: 'NEW SMS NUMBER'
+      },'/unknown', function(res) {
+        assert.equal(res.statusCode, 404);
+        assert.equal(res.body.code, 'NO_SUCH_ENDPOINT');
+        done();
+      });
+    });
+
+    it('calling POST on /templates/2 => 400 - new resources can only be added to predefined collections', function(done){
+      http.post({
+        name: 'NEW SMS NUMBER'
+      },'/templates/2', function(res) {
+        assert.equal(res.statusCode, 400);
+        assert.equal(res.body.code, 'BAD_REQUEST');
+        assert.equal(res.body.message, 'POST only available on collection endpoints');
+        done();
+      });
+    });
+
+    it('calling POST on /templates => 201 - new template added, id generated', function(done){
+      http.post({
+        name: 'NEW SMS NUMBER'
+      },'/templates', function(res) {
+        assert.equal(res.statusCode, 201);
+        http.get('/templates/' + res.body.id, function(res2) {
+          assert.equal(res2.statusCode, 200);
+          assert.equal(res2.body.id, res.body.id);
+          assert.equal(res.body.name, 'NEW SMS NUMBER');
+          done();
+        });
+      });
+    });
+
+    it('calling POST on /templates with a collection => 400 - only single object expected', function(done){
+      http.post(templates, '/templates', function(res) {
+        assert.equal(res.statusCode, 400);
+        assert.equal(res.body.code, 'BAD_REQUEST');
+        assert.equal(res.body.message, 'Single object expected but found collection');
+        done();
+      });
+    });
+
+    it('calling POST on /templates with a collection => 400 - only single object expected', function(done){
+      http.post(null, '/templates', function(res) {
+        assert.equal(res.statusCode, 400);
+        assert.equal(res.body.code, 'BAD_REQUEST');
+        assert.equal(res.body.message, 'No payload sent');
+        done();
       });
     });
 

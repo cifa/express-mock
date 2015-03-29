@@ -1,7 +1,7 @@
 {
   "paths": [
       "/templates",
-      "/templates/{{id}}"
+      "/templates/{{id:int[1,1000]}}"
   ],
 
   "fixtures": {

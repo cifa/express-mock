@@ -13,10 +13,12 @@ var ExpressMock = (function () {
     this.service.loadConfig(config.configFilePath);
     this.app = express();
 
-    this.app.use(bodyParser.json());
+    this.app.use(bodyParser.json({strict: false}));
     this.app.use(this.service.reset);
     this.app.use(this.service.schedule);
-    this.app.use(this.service.process);
+    this.app.use(this.service.processOptions);
+    this.app.use(this.service.processPost);
+    this.app.use(this.service.processOther);
   };
 
   function invokeCallback(callback) {

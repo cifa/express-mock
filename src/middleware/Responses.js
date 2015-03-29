@@ -1,16 +1,17 @@
 (function() {
   exports.default = function(req, res) {
     res.set('Content-Type', 'application/json');
-    if (req.method === 'OPTIONS') {
-      res.status(200);
-      res.set('Access-Control-Allow-Origin', '*');
-      res.set('Access-Control-Allow-Credentials', 'true');
-      res.set('Access-Control-Allow-Headers', 'origin, content-type, accept, authorization, Access-Control-Allow-Origin');
-      res.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS, HEAD')
-  		res.end();
-    } else {
-      reply404(req, res, 'NO_SUCH_ENDPOINT');
-    }
+    reply404(req, res, 'NO_SUCH_ENDPOINT');
+  };
+
+  exports.sendCORSHeaders = function(req, res) {
+    res.status(200);
+    res.set('Content-Type', 'application/json');
+    res.set('Access-Control-Allow-Origin', '*');
+    res.set('Access-Control-Allow-Credentials', 'true');
+    res.set('Access-Control-Allow-Headers', 'origin, content-type, accept, authorization, Access-Control-Allow-Origin');
+    res.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS, HEAD')
+    res.end();
   };
 
   exports.reply = function(result, req, res) {
