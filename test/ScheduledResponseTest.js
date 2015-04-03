@@ -1,5 +1,5 @@
 var assert = require('assert')
-var expressMock = require('../src/ExpressMock').ExpressMock;
+var expressMock = require('../lib/ExpressMock').ExpressMock;
 var http = require('./httpHelper');
 
 describe('ExpressMock', function(){

@@ -2,9 +2,10 @@
   "name": "express-mock",
   "version": "0.1.0",
   "description": "Simple HTTP server for mocking RESTful WS",
-  "main": "./js/ExpressMock.js",
+  "main": "./lib/ExpressMock.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "grunt",
+    "start": "node start"
   },
   "dependencies": {
     "express": "4.12.3",

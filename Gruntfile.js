@@ -4,7 +4,7 @@ module.exports = function(grunt) {
 
     watch: {
       karma:  {
-        files: ['src/**/*.js', 'test/**/*.js'],
+        files: ['lib/**/*.js', 'test/**/*.js'],
         tasks: ['simplemocha']
       }
     },
