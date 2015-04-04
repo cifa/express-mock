@@ -45,7 +45,7 @@ describe('ExpressMock', function(){
         assert.equal(res.statusCode, 200);
         assert.equal(res.headers['access-control-allow-origin'], '*');
         assert.equal(res.headers['access-control-allow-credentials'], 'true');
-        assert.equal(res.headers['access-control-allow-headers'], 'origin, content-type, accept, authorization, Access-Control-Allow-Origin');
+        assert.equal(res.headers['access-control-allow-headers'], 'undefined');
         assert.equal(res.headers['access-control-allow-methods'], 'GET, POST, PUT, DELETE, OPTIONS, HEAD');
         done();
       });
