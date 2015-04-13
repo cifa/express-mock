@@ -1,6 +1,6 @@
 {
   "name": "express-mock",
-  "version": "0.1.0",
+  "version": "v0.3.0",
   "description": "Simple HTTP server for mocking RESTful WS",
   "main": "./lib/ExpressMock.js",
   "scripts": {
