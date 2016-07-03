@@ -250,6 +250,16 @@ describe('ExpressMock', function(){
       });
     });
 
+    it('calling POST on /templates => 201 - numeric id generated', function(done){
+      http.post({
+        name: 'NEW SMS NUMBER'
+      },'/templates', function(res) {
+        assert.equal(res.statusCode, 201);
+        assert.equal(typeof res.body.id == "number", true);
+        done();
+      });
+    });
+
     it('calling POST on /templates => 201 - new template added, id generated', function(done){
       http.post({
         name: 'NEW SMS NUMBER'
