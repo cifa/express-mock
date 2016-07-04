@@ -1,0 +1,40 @@
+{
+  "paths": [
+    "/api/v1/{{id:uuid}}/productRestrictions",
+    "/api/v1/{{id:uuid}}/users/{{id:uuid}}/entitlements",
+    "/api/v1/{{id:uuid}}/users/{{id:uuid}}/entitlements/{{id:int}}"
+  ],
+
+  "fixtures": {
+    "api": {
+      "v1": [
+        {
+          "id": "MTA",
+          "productRestrictions": [
+            {
+              "id": 1,
+              "name": "STUDENT",
+              "description": "Student discount",
+              "entitlementDurationDays": 365,
+              "restrictionType": "RIDER",
+              "proofRequired": true
+            },{
+              "id": 5,
+              "name": "MILITARY",
+              "description": "Military discount",
+              "entitlementDurationDays": 180,
+              "restrictionType": "RIDER",
+              "proofRequired": true
+            }
+          ],
+          "users": [
+            {
+              "id": "WCPK5VCEBES",
+              "entitlements": []
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
